@@ -1,0 +1,5 @@
+google-cloud-storage>=2.10.0
+pandas>=2.0.0
+requests>=2.31.0
+pyspark>=3.4.0
+delta-spark>=2.4.0
