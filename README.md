@@ -13,10 +13,3 @@ graph TD
     C -->|Schema Enforcement & Cleansing| D[Silver Layer - Delta Lake]
     D -->|Sentiment & Market Aggregation| E[Gold Layer - Delta Lake]
     E -->|Natural Language Prompt| F[Text-to-SQL AI Engine]
-Bullish Ratio = 
-DIVIDE(
-    CALCULATE(COUNTROWS('gold_crypto_summary'), 'gold_crypto_summary'[market_sentiment] = "BULLISH"), 
-    COUNTROWS('gold_crypto_summary'), 
-    0
-)
-Avg 24h Volume = AVERAGE('gold_crypto_summary'[total_volume])
