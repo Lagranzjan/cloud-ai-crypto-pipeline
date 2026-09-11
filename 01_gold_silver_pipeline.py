@@ -61,32 +61,58 @@ display(gold_summary_df)
 
 # COMMAND ----------
 
-import json
+import requests
 
-# Funkcja symulująca silnik Text-to-SQL / LLM Agent
-def ai_query_engine(user_prompt):
+def ai_query_engine(user_prompt: str, api_key: str = None):
+    """
+    Generuje zapytanie SQL na podstawie języka naturalnego przy użyciu LLM (Llama-3 przez Groq API).
+    """
     print(f"💬 Pytanie użytkownika: '{user_prompt}'")
     
-    # Schemat tabeli przekazywany do AI (Prompt Context)
-    schema_info = "Table: gold_crypto_summary (symbol STRING, name STRING, current_price DOUBLE, market_cap DOUBLE, change_24h_pct DOUBLE, market_sentiment STRING)"
+    schema_info = """
+    Table: gold_crypto_summary
+    Columns:
+    - symbol (STRING)
+    - name (STRING)
+    - current_price (DOUBLE)
+    - market_cap (DOUBLE)
+    - change_24h_pct (DOUBLE)
+    - market_sentiment (STRING: 'BULLISH' or 'BEARISH')
+    """
     
-    # Mapowanie prostej logiki (w docelowej aplikacji tu wpinamy OpenAI API / LangChain)
-    prompt_lower = user_prompt.lower()
-    
-    if "największy market cap" in prompt_lower or "largest market cap" in prompt_lower:
-        generated_sql = "SELECT name, symbol, market_cap FROM gold_crypto_summary ORDER BY market_cap DESC LIMIT 1"
-    elif "spadły" in prompt_lower or "bearish" in prompt_lower:
-        generated_sql = "SELECT name, symbol, change_24h_pct FROM gold_crypto_summary WHERE market_sentiment = 'BEARISH' ORDER BY change_24h_pct ASC"
-    else:
-        generated_sql = "SELECT name, symbol, current_price, market_sentiment FROM gold_crypto_summary ORDER BY current_price DESC LIMIT 5"
-        
-    print(f"🤖 Wygenerowany przez AI kod SQL:\n{generated_sql}\n")
-    
-    # Wykonanie zapytania bezpośrednio na danych z Delta Lake
-    result_df = spark.sql(generated_sql)
-    return result_df
+    # Jeśli brak klucza API, stosujemy fallback z promptem systemowym
+    if not api_key:
+        print("⚠️ Brak API Key - symulacja strukturalna promptu systemowego LLM.")
+        prompt_lower = user_prompt.lower()
+        if "spadły" in prompt_lower or "bearish" in prompt_lower:
+            generated_sql = "SELECT name, symbol, change_24h_pct FROM gold_crypto_summary WHERE market_sentiment = 'BEARISH' ORDER BY change_24h_pct ASC"
+        else:
+            generated_sql = "SELECT name, symbol, market_cap FROM gold_crypto_summary ORDER BY market_cap DESC LIMIT 5"
+        return spark.sql(generated_sql)
 
-# Uruchomienie przykładu
+    # Zapytanie do prawdziwego LLM (Groq / Llama-3)
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    payload = {
+        "model": "llama3-8b-8192",
+        "messages": [
+            {"role": "system", "content": f"You are a SQL expert. Translate user prompt into Spark SQL based ONLY on this schema: {schema_info}. Return ONLY the raw SQL query without markdown code blocks."},
+            {"role": "user", "content": user_prompt}
+        ]
+    }
+    
+    response = requests.post(url, json=payload, headers=headers)
+    generated_sql = response.json()['choices'][0]['message']['content'].strip()
+    
+    print(f"🤖 Wygenerowany przez LLM kod SQL:\n{generated_sql}\n")
+    return spark.sql(generated_sql)
+
+# COMMAND ----------
+
+ai_query_engine("Pokaż mi krypto, które najbardziej spadły")
+
+# COMMAND ----------
+
 display(ai_query_engine("Pokaż mi krypto, które najbardziej spadły"))
 
 # COMMAND ----------
