@@ -82,7 +82,7 @@ def ai_query_engine(user_prompt: str, api_key: str = None):
     
     # Jeśli brak klucza API, stosujemy fallback z promptem systemowym
     if not api_key:
-        print("⚠️ Brak API Key - symulacja strukturalna promptu systemowego LLM.")
+        print("Brak API Key - symulacja strukturalna promptu systemowego LLM.")
         prompt_lower = user_prompt.lower()
         if "spadły" in prompt_lower or "bearish" in prompt_lower:
             generated_sql = "SELECT name, symbol, change_24h_pct FROM gold_crypto_summary WHERE market_sentiment = 'BEARISH' ORDER BY change_24h_pct ASC"
