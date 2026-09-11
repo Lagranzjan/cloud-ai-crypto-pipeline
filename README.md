@@ -1,4 +1,6 @@
 # End-to-End Cloud Data & AI Engine (GCP + Databricks + PySpark)
+## 📊 Pipeline Execution & AI Query Demo
+![Databricks Pipeline & AI Query Output](screenshot.png)
 
 An enterprise-grade Lakehouse data pipeline and natural language query engine for crypto market analytics, built on GCP Storage and Databricks Delta Lake.
 
