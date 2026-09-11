@@ -1,4 +1,5 @@
 # End-to-End Cloud Data & AI Engine (GCP + Databricks + PySpark)
+
 ## 📊 Pipeline Execution & AI Query Demo
 ![Databricks Pipeline & AI Query Output](screenshot.png)
 
@@ -12,14 +13,10 @@ graph TD
     C -->|Schema Enforcement & Cleansing| D[Silver Layer - Delta Lake]
     D -->|Sentiment & Market Aggregation| E[Gold Layer - Delta Lake]
     E -->|Natural Language Prompt| F[Text-to-SQL AI Engine]
-### 📊 Business Intelligence & Semantic Model (Power BI / DAX)
-The Gold Delta table is modeled for direct analytical access. Key semantic measures created in DAX:
-
-* **Bullish Market Ratio**:
-  ```dax
-  Bullish Ratio = 
-  DIVIDE(
-      CALCULATE(COUNTROWS('gold_crypto_summary'), 'gold_crypto_summary'[market_sentiment] = "BULLISH"), 
-      COUNTROWS('gold_crypto_summary'), 
-      0
-  )
+Bullish Ratio = 
+DIVIDE(
+    CALCULATE(COUNTROWS('gold_crypto_summary'), 'gold_crypto_summary'[market_sentiment] = "BULLISH"), 
+    COUNTROWS('gold_crypto_summary'), 
+    0
+)
+Avg 24h Volume = AVERAGE('gold_crypto_summary'[total_volume])
